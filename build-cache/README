@@ -1,0 +1,10 @@
+This image contains sshd, for Travis build cache uploading.
+sshd is configured to only allow connections from the 'cache' user.
+User password is set through the PASSWD variable. The container will fail if not set.
+The /key directory hold the server's key and /cache can be used for cache uploading.
+
+Example invocation:
+
+docker build -t cache .
+sudo mkdir -p /cache/{key,cache}
+docker run -d -e 'PASSWD=secure' -v '/cache/key:/key' -v '/cache/cache:/cache' -p 2222:22
