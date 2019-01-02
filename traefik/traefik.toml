@@ -1,0 +1,38 @@
+debug = false
+
+logLevel = "WARN"
+defaultEntryPoints = ["https","http"]
+
+[accessLog]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.redirect]
+      regex = "^https://mailu.io/(.*)?/_downloads/(docker-compose.yml|.env)"
+      replacement = "https://raw.githubusercontent.com/Mailu/Mailu/${1}/docs/compose/${2}"
+    [entryPoints.https.tls]
+
+[retry]
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "mailu.io"
+watch = true
+exposedByDefault = false
+network = "web"
+
+[acme]
+email = "tim@usrpro.com"
+storage = "acme.json"
+entryPoint = "https"
+  [acme.httpChallenge]
+  entryPoint = "http"
+
+[[acme.domains]]
+  main = "mailu.io"
+  sans = ["setup.mailu.io","test.mailu.io"]

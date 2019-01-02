@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  # The reverse proxy service (Traefik)
+  traefik:
+    image: traefik  # The official Traefik docker image
+    command: --api --docker  # Enables the web UI and tells Traefik to listen to docker
+    restart: always
+    ports:
+      - "80:80"      # The HTTP port
+      - "443:443"    
+      - "127.0.0.1:8080:8080"  # The Web UI (enabled by --api)
+    networks:
+      - web 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # So that Traefik can listen to the Docker events
+      - /opt/traefik/traefik.toml:/traefik.toml
+      - /opt/traefik/acme.json:/acme.json
+    container_name: traefik
+
+networks:
+  web:
+    external: true

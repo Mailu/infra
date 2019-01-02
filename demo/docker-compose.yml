@@ -1,0 +1,208 @@
+version: '2.2'
+
+services:
+
+  front:
+    image: mailu/nginx:$VERSION
+    restart: always
+    env_file: .env
+    logging:
+      driver: $LOG_DRIVER
+    ports:
+#      - "$BIND_ADDRESS4:80:80"
+#      - "$BIND_ADDRESS4:443:443"
+      - "$BIND_ADDRESS4:110:110"
+      - "$BIND_ADDRESS4:143:143"
+      - "$BIND_ADDRESS4:993:993"
+      - "$BIND_ADDRESS4:995:995"
+      - "$BIND_ADDRESS4:25:25"
+      - "$BIND_ADDRESS4:465:465"
+      - "$BIND_ADDRESS4:587:587"
+#      - "$BIND_ADDRESS6:80:80"
+#      - "$BIND_ADDRESS6:443:443"
+      - "$BIND_ADDRESS6:110:110"
+      - "$BIND_ADDRESS6:143:143"
+      - "$BIND_ADDRESS6:993:993"
+      - "$BIND_ADDRESS6:995:995"
+      - "$BIND_ADDRESS6:25:25"
+      - "$BIND_ADDRESS6:465:465"
+      - "$BIND_ADDRESS6:587:587"
+    volumes:
+      - "$ROOT/certs:/certs"
+      - "$ROOT/overrides/nginx:/overrides"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:$TRAEFIK_DOMAIN"
+      - "traefik.docker.network=web"
+    networks:
+      - web
+      - default
+    mem_limit: 150m
+    cpus: 0.2
+
+  resolver:
+    image: mailu/unbound:$VERSION
+    env_file: .env
+    restart: always
+    networks:
+      default:
+        ipv4_address: $DNS
+      web:
+    mem_limit: 150m
+    cpus: 0.2
+
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - "$ROOT/redis:/data"
+    networks:
+      - default
+
+  imap:
+    image: mailu/dovecot:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/mail:/mail"
+      - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
+    networks:
+      - default
+    blkio_config:
+      weight: 100
+    mem_limit: 250m
+    cpus: 0.3
+
+  smtp:
+    image: mailu/postfix:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/overrides:/overrides"
+    depends_on:
+      - front
+      - resolver
+    networks:
+      - default
+    dns:
+      - $DNS
+    blkio_config:
+      weight: 100
+    mem_limit: 250m
+    cpus: 0.2
+
+  antispam:
+    image: mailu/rspamd:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/filter:/var/lib/rspamd"
+      - "$ROOT/dkim:/dkim"
+      - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
+    depends_on:
+      - front
+      - resolver
+    networks:
+      - default
+      - web
+    dns:
+      - $DNS
+    mem_limit: 400m
+    cpus: 0.2
+
+  antivirus:
+    image: mailu/$ANTIVIRUS:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/filter:/data"
+    depends_on:
+      - resolver
+    networks:
+      - default
+      - web
+    dns:
+      - $DNS
+    blkio_config:
+      weight: 100
+    mem_limit: 1500m
+    cpus: 0.75
+
+  webdav:
+    image: mailu/$WEBDAV:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/dav:/data"
+    networks:
+      - default
+    blkio_config:
+      weight: 100
+    mem_limit: 100m
+    cpus: 0.1
+
+  admin:
+    image: mailu/admin:$VERSION
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/data:/data"
+      - "$ROOT/dkim:/dkim"
+    depends_on:
+      - redis
+    networks:
+      - default
+    mem_limit: 500m
+    cpus: 0.5
+
+  webmail:
+    image: "mailu/$WEBMAIL:$VERSION"
+    restart: always
+    env_file: .env
+    volumes:
+      - "$ROOT/webmail:/data"
+    depends_on:
+      - imap
+    networks:
+      - default
+    mem_limit: 500m
+    cpus: 0.2
+
+  fetchmail:
+    image: mailu/fetchmail:$VERSION
+    restart: always
+    env_file: .env
+    networks:
+      - default
+      - web
+    depends_on:
+      - resolver
+    dns:
+      - $DNS
+    mem_limit: 200m
+    cpus: 0.2
+
+  certdumper:
+    restart: always
+    image: mailu/traefik-certdumper:$VERSION
+    environment:
+    # Make sure this is the same as the main=-domain in traefik.toml
+    # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
+      - DOMAIN=$TRAEFIK_DOMAIN
+    volumes:
+      - "/opt/traefik:/traefik"
+      - "$ROOT/certs:/output"    
+
+networks:
+  default:
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: $SUBNET
+  web:
+    external: true
