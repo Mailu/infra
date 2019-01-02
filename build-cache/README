@@ -7,4 +7,4 @@ Example invocation:
 
 docker build -t cache .
 sudo mkdir -p /cache/{key,cache}
-docker run -d -e 'PASSWD=secure' -v '/cache/key:/key' -v '/cache/cache:/cache' -p 2222:22
+docker run -d -e 'PASSWD=secure' -v '/cache/key:/key' -v '/cache/cache:/cache' -p 2222:22 cache
