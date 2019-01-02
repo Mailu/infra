@@ -14,7 +14,7 @@ services:
       - web 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # So that Traefik can listen to the Docker events
-      - /opt/traefik/traefik.toml:/traefik.toml
+      - /opt/infra/traefik/traefik.toml:/traefik.toml
       - /opt/traefik/acme.json:/acme.json
     container_name: traefik
 
