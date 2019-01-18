@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 cd /opt/mailu
 docker-compose down || exit 1
 rm -rf /mailu

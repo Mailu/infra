@@ -20,12 +20,12 @@ services:
       - traefik.enable=true
       - traefik.port=80
       - traefik.docker.network=web
-      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master/
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master
     depends_on:
       - redis
 
   release:
-    image: usrpro/setup:${RELEASE}
+    image: mailu/setup:${RELEASE}
     networks:
       - web
       - default
