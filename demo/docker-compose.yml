@@ -3,7 +3,7 @@ version: '2.2'
 services:
 
   front:
-    image: mailu/nginx:$VERSION
+    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     logging:
@@ -42,7 +42,7 @@ services:
     cpus: 0.2
 
   resolver:
-    image: mailu/unbound:$VERSION
+    image: ${DOCKER_ORG:-mailu}/unbound:${MAILU_VERSION:-master}
     env_file: .env
     restart: always
     networks:
@@ -61,7 +61,7 @@ services:
       - default
 
   imap:
-    image: mailu/dovecot:$VERSION
+    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -77,7 +77,7 @@ services:
     cpus: 0.3
 
   smtp:
-    image: mailu/postfix:$VERSION
+    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -95,7 +95,7 @@ services:
     cpus: 0.2
 
   antispam:
-    image: mailu/rspamd:$VERSION
+    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -114,7 +114,7 @@ services:
     cpus: 0.2
 
   antivirus:
-    image: mailu/$ANTIVIRUS:$VERSION
+    image: ${DOCKER_ORG:-mailu}/$ANTIVIRUS:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -132,7 +132,7 @@ services:
     cpus: 0.75
 
   webdav:
-    image: mailu/$WEBDAV:$VERSION
+    image: ${DOCKER_ORG:-mailu}/$WEBDAV:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -145,7 +145,7 @@ services:
     cpus: 0.1
 
   admin:
-    image: mailu/admin:$VERSION
+    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -159,7 +159,7 @@ services:
     cpus: 0.5
 
   webmail:
-    image: "mailu/$WEBMAIL:$VERSION"
+    image: "${DOCKER_ORG:-mailu}/$WEBMAIL:${MAILU_VERSION:-master}"
     restart: always
     env_file: .env
     volumes:
@@ -172,7 +172,7 @@ services:
     cpus: 0.2
 
   fetchmail:
-    image: mailu/fetchmail:$VERSION
+    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     networks:
@@ -187,7 +187,7 @@ services:
 
   certdumper:
     restart: always
-    image: mailu/traefik-certdumper:$VERSION
+    image: ${DOCKER_ORG:-mailu}/traefik-certdumper:${MAILU_VERSION:-master}
     environment:
     # Make sure this is the same as the main=-domain in traefik.toml
     # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
