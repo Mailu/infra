@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /opt/mailu
+cd /opt/infra/demo
 docker-compose down || exit 1
 rm -rf /mailu
 docker-compose up -d || exit 1

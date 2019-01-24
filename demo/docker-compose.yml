@@ -33,7 +33,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.port=80"
-      - "traefik.frontend.rule=Host:$TRAEFIK_DOMAIN"
+      - "traefik.frontend.rule=Host:test.mailu.io"
       - "traefik.docker.network=web"
     networks:
       - web
