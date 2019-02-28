@@ -7,6 +7,7 @@ services:
     image: redis:alpine
     networks:
       - default
+    restart: always
 
   master:
     image: mailu/setup:master
@@ -23,6 +24,7 @@ services:
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master
     depends_on:
       - redis
+    restart: always
 
   release:
     image: mailu/setup:${RELEASE}
@@ -42,6 +44,7 @@ services:
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${RELEASE}/
     depends_on:
       - redis
+    restart: always
 
 networks:
   web:

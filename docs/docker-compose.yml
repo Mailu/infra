@@ -10,6 +10,7 @@ services:
       - traefik.enable=true
       - traefik.port=80
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master/
+    restart: always
 
   '16':
     image: mailu/docs:1.6
@@ -22,6 +23,7 @@ services:
       - traefik.root.frontend.redirect.replacement=/1.6/
       - traefik.root.frontend.rule=Host:${ADDRESS};PathPrefix:/
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/1.6/
+    restart: always
 
   '15':
     image: mailu/docs:1.5
@@ -31,6 +33,7 @@ services:
       - traefik.enable=true
       - traefik.port=80
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/1.5/
+    restart: always
 
 networks:
   web:
