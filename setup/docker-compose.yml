@@ -46,6 +46,23 @@ services:
       - redis
     restart: always
 
+  beta:
+    image: mailu/setup:1.7
+    networks:
+      - web
+      - default
+    env_file: .env
+    environment:
+      this_version: "1.7"
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.docker.network=web
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/1.7
+    depends_on:
+      - redis
+    restart: always
+
 networks:
   web:
     external: true
