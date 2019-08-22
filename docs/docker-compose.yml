@@ -12,6 +12,16 @@ services:
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master/
     restart: always
 
+  '17':
+    image: mailu/docs:1.7
+    networks:
+      - web
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/1.7/
+    restart: always
+
   '16':
     image: mailu/docs:1.6
     networks:
