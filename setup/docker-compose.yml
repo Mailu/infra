@@ -9,56 +9,59 @@ services:
       - default
     restart: always
 
-  master:
-    image: mailu/setup:master
+  development:
+    image: mailu/setup:${DEVELOPMENT}
     networks:
       - web
       - default
     env_file: .env
     environment:
-      this_version: "master"
+      this_version: ${DEVELOPMENT}
+      VERSIONS: ${OLD_STABLE},${STABLE},${DEVELOPMENT}
     labels:
       - traefik.enable=true
       - traefik.port=80
       - traefik.docker.network=web
-      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/master
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${DEVELOPMENT}/
     depends_on:
       - redis
     restart: always
 
-  release:
-    image: mailu/setup:${RELEASE}
+  stable:
+    image: mailu/setup:${STABLE}
     networks:
       - web
       - default
     env_file: .env
     environment:
-      this_version: ${RELEASE}
+      this_version: ${STABLE}
+      VERSIONS: ${OLD_STABLE},${STABLE},${DEVELOPMENT}
     labels:
       - traefik.enable=true
       - traefik.port=80
       - traefik.docker.network=web
       - traefik.root.frontend.redirect.regex=.*
-      - traefik.root.frontend.redirect.replacement=/${RELEASE}/
+      - traefik.root.frontend.redirect.replacement=/${STABLE}/
       - traefik.root.frontend.rule=Host:${ADDRESS};PathPrefix:/
-      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${RELEASE}/
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${STABLE}/
     depends_on:
       - redis
     restart: always
 
-  beta:
-    image: mailu/setup:1.7
+  oldstable:
+    image: mailu/setup:${OLD_STABLE}
     networks:
       - web
       - default
     env_file: .env
     environment:
-      this_version: "1.7"
+      this_version: "${OLD_STABLE}"
+      VERSIONS: ${OLD_STABLE},${STABLE},${DEVELOPMENT}
     labels:
       - traefik.enable=true
       - traefik.port=80
       - traefik.docker.network=web
-      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/1.7
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${OLD_STABLE}/
     depends_on:
       - redis
     restart: always
