@@ -6,7 +6,7 @@
 
 set -e
 
-for d in */; do (
+for d in /opt/infra/*/; do (
         cd $d
         docker-compose pull
         docker-compose up -d
