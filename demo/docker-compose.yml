@@ -128,7 +128,7 @@ services:
       - $DNS
     blkio_config:
       weight: 100
-    mem_limit: 1500m
+    mem_limit: 2000m
     cpus: 0.75
 
   webdav:
