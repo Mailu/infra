@@ -16,13 +16,33 @@ services:
       - default
     env_file: .env
     environment:
+      stable_version: ${STABLE}
       this_version: ${DEVELOPMENT}
-      VERSIONS: ${STABLE},${DEVELOPMENT}
+      VERSIONS: ${STABLE},${TESTING},${DEVELOPMENT}
     labels:
       - traefik.enable=true
       - traefik.port=80
       - traefik.docker.network=web
       - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${DEVELOPMENT}
+    depends_on:
+      - redis
+    restart: always
+
+  testing:
+    image: mailu/setup:${TESTING}
+    networks:
+      - web
+      - default
+    env_file: .env
+    environment:
+      stable_version: ${STABLE}
+      this_version: ${TESTING}
+      VERSIONS: ${STABLE},${TESTING},${DEVELOPMENT}
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.docker.network=web
+      - traefik.main.frontend.rule=Host:${ADDRESS};PathPrefix:/${TESTING}
     depends_on:
       - redis
     restart: always
@@ -34,8 +54,9 @@ services:
       - default
     env_file: .env
     environment:
+      stable_version: ${STABLE}
       this_version: ${STABLE}
-      VERSIONS: ${STABLE},${DEVELOPMENT}
+      VERSIONS: ${STABLE},${TESTING},${DEVELOPMENT}
     labels:
       - traefik.enable=true
       - traefik.port=80
