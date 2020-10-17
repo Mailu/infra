@@ -6,9 +6,10 @@
 
 set -e
 
-for d in /opt/infra/*/; do (
-        cd $d
+for service in demo docs setup traefik ; do (
+        pushd /opt/infra/$service/
         docker-compose pull
         docker-compose up -d
+        popd
         )
 done
