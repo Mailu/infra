@@ -13,3 +13,5 @@ for service in demo docs setup traefik ; do (
         popd
         )
 done
+
+docker image prune -f
