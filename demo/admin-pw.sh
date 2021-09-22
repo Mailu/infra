@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /opt/infra/demo
-/usr/local/bin/docker-compose exec -d admin flask mailu password admin test.mailu.io letmein
+/usr/local/bin/docker-compose exec admin flask mailu admin --mode update admin test.mailu.io letmein >/dev/null
