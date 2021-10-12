@@ -36,16 +36,16 @@ The `default` network is set to `internal`. Remainning services that need intern
 The `front` service is bound to the usual ports, except `80` and `443`, as these web ports are routed through traefik.
 This means that the demo server can:
 
- 1. Recieve SMTP e-mail (both incomming in authenticated)
+ 1. Receive SMTP e-mail (both incomming in authenticated)
  2. Serve authenticated IMAP and POP3 connections from clients
  3. Provide access to the webmail and admin interfaces
  4. Have fully functional virusscanner, downloading the appropiate definitions
 
-However, the demo server cannot send any SMTP mail to external hosts. Those mails will remain stuck in the queueu forever.
+However, the demo server cannot send any SMTP mail to external hosts. Those mails will remain stuck in the queue forever.
 
 ## The server
 
-The server is running Ubuntu 18.04.5 LTS, with Docker latest stable from the Docker official APT repositories. `ufw` firewall is enabled and only allows access to ssh port 22. Other ports for services are configured by Docker.
+The server is running Ubuntu 18.04.5 LTS, with Docker latest stable from the Docker official APT repositories. `ufw` firewall is enabled and only allows access to SSH, HTTP and HTTPS. Other ports for services are configured by Docker.
 
 ### SSH access
 
@@ -53,7 +53,7 @@ Members of the "Contributors" team can gain access by posting their public keys 
 
 Users are in priciple unprivelidged. For example, they are not member of the `docker` group. It is a small security measure to prevent priviledged access should a private key get compromised. All users are member of the `sudo` group. On first login an user password must be set by the `passwd` command.
 
-Keys that are added must use `rsa` (>= 2048), `ecds` (>=256) or `ed25519`. We also request to make sure the private key is password protected.
+Keys that are added must use `rsa` (>= 2048), `ecdsa` (>=256) or `ed25519`. We also request to make sure the private key is password protected.
 
 A copy of applicable `sshd_config` options can be found in `./ssh/sshd_config`.
 
