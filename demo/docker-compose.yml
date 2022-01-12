@@ -40,6 +40,10 @@ services:
       - default
     mem_limit: 150m
     cpus: 0.2
+    depends_on:
+      - resolver
+    dns:
+      - $DNS
 
   resolver:
     image: ${DOCKER_ORG:-mailu}/unbound:${MAILU_VERSION:-master}
@@ -69,6 +73,9 @@ services:
       - "$ROOT/overrides:/overrides"
     depends_on:
       - front
+      - resolver
+    dns:
+      - $DNS      
     networks:
       - default
     blkio_config:
@@ -143,6 +150,10 @@ services:
       weight: 100
     mem_limit: 100m
     cpus: 0.1
+    depends_on:
+      - resolver
+    dns:
+      - $DNS
 
   admin:
     image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-master}
@@ -153,6 +164,9 @@ services:
       - "$ROOT/dkim:/dkim"
     depends_on:
       - redis
+      - resolver
+    dns:
+      - $DNS          
     networks:
       - default
     mem_limit: 500m
@@ -166,6 +180,9 @@ services:
       - "$ROOT/webmail:/data"
     depends_on:
       - imap
+      - resolver
+    dns:
+      - $DNS
     networks:
       - default
     mem_limit: 500m
