@@ -192,7 +192,7 @@ services:
     cpus: 0.5
 
   webmail:
-    image: "${DOCKER_ORG:-mailu}/webmail:{MAILU_VERSION:-master}"
+    image: "${DOCKER_ORG:-mailu}/webmail:${MAILU_VERSION:-master}"
     restart: always
     env_file: .env
     volumes:
