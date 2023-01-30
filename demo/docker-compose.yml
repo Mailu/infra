@@ -202,7 +202,7 @@ services:
     dns:
       - $DNS
     networks:
-      - default
+      - webmail
     mem_limit: 500m
     cpus: 0.2
 
