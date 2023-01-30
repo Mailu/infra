@@ -147,8 +147,6 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/filter:/data"
-    depends_on:
-      - resolver
     networks:
       - default
       - web
@@ -197,8 +195,6 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
-    depends_on:
-      - front
     dns:
       - $DNS
     networks:
