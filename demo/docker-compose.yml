@@ -169,8 +169,6 @@ services:
       weight: 100
     mem_limit: 100m
     cpus: 0.1
-    dns:
-      - $DNS
 
   admin:
     image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-master}
@@ -195,8 +193,6 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
-    dns:
-      - $DNS
     networks:
       - webmail
     mem_limit: 500m
