@@ -38,6 +38,7 @@ services:
     networks:
       - web
       - default
+      - webmail
     mem_limit: 150m
     cpus: 0.2
     depends_on:
@@ -63,6 +64,8 @@ services:
       - "$ROOT/redis:/data"
     networks:
       - default
+    depends_on:
+      - resolver
 
   imap:
     image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-master}
@@ -70,7 +73,7 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/mail:/mail"
-      - "$ROOT/overrides:/overrides"
+      - "$ROOT/overrides:/overrides:ro"
     depends_on:
       - front
       - resolver
@@ -107,7 +110,7 @@ services:
     restart: always
     env_file: .env
     networks:
-      - default
+      - noinet
     depends_on:
       - resolver
     dns:
@@ -125,10 +128,14 @@ services:
       - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
+      - redis
+      - oletools
+      - antivirus
       - resolver
     networks:
       - default
       - web
+      - noinet
     dns:
       - $DNS
     mem_limit: 400m
@@ -159,13 +166,11 @@ services:
     volumes:
       - "$ROOT/dav:/data"
     networks:
-      - default
+      - radicale
     blkio_config:
       weight: 100
     mem_limit: 100m
     cpus: 0.1
-    depends_on:
-      - resolver
     dns:
       - $DNS
 
@@ -187,14 +192,13 @@ services:
     cpus: 0.5
 
   webmail:
-    image: "${DOCKER_ORG:-mailu}/$WEBMAIL:${MAILU_VERSION:-master}"
+    image: "${DOCKER_ORG:-mailu}/webmail:{MAILU_VERSION:-master}"
     restart: always
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
     depends_on:
-      - imap
-      - resolver
+      - front
     dns:
       - $DNS
     networks:
@@ -210,6 +214,9 @@ services:
       - default
       - web
     depends_on:
+      - admin
+      - smtp
+      - imap
       - resolver
     dns:
       - $DNS
@@ -237,3 +244,10 @@ networks:
         - subnet: $SUBNET
   web:
     external: true
+  radicale:
+    driver: bridge
+  webmail:
+    driver: bridge
+  noinet:
+    driver: bridge
+    internal: true
