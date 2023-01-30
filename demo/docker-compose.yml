@@ -29,7 +29,7 @@ services:
       - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
-      - "$ROOT/overrides/nginx:/overrides"
+      - "$ROOT/overrides/nginx:/overrides:ro"
     labels:
       - "traefik.enable=true"
       - "traefik.port=80"
@@ -75,7 +75,7 @@ services:
       - front
       - resolver
     dns:
-      - $DNS      
+      - $DNS
     networks:
       - default
     blkio_config:
@@ -100,6 +100,20 @@ services:
       weight: 100
     mem_limit: 250m
     cpus: 0.2
+
+  oletools:
+    image: ${DOCKER_ORG:-mailu}/oletools:${MAILU_VERSION:-master}
+    hostname: oletools
+    restart: always
+    env_file: .env
+    networks:
+      - default
+    depends_on:
+      - resolver
+    dns:
+      - $DNS
+    mem_limit: 500m
+    cpus: 0.5
 
   antispam:
     image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-master}
@@ -166,7 +180,7 @@ services:
       - redis
       - resolver
     dns:
-      - $DNS          
+      - $DNS
     networks:
       - default
     mem_limit: 500m
@@ -211,7 +225,7 @@ services:
       - DOMAIN=$TRAEFIK_DOMAIN
     volumes:
       - "/opt/traefik:/traefik"
-      - "$ROOT/certs:/output"    
+      - "$ROOT/certs:/output"
 
 networks:
   default:
