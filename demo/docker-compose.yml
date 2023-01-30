@@ -111,10 +111,6 @@ services:
     env_file: .env
     networks:
       - noinet
-    depends_on:
-      - resolver
-    dns:
-      - $DNS
     mem_limit: 500m
     cpus: 0.5
 
@@ -150,6 +146,8 @@ services:
     networks:
       - default
       - web
+    depends_on:
+      - resolver
     dns:
       - $DNS
     blkio_config:
@@ -238,8 +236,10 @@ networks:
     external: true
   radicale:
     driver: bridge
+    internal: true
   webmail:
     driver: bridge
+    internal: true
   noinet:
     driver: bridge
     internal: true
