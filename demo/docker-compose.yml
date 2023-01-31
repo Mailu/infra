@@ -29,7 +29,7 @@ services:
       - "$BIND_ADDRESS6:587:587"
     volumes:
       - "$ROOT/certs:/certs"
-      - "$ROOT/overrides/nginx:/overrides"
+      - "$ROOT/overrides/nginx:/overrides:ro"
     labels:
       - "traefik.enable=true"
       - "traefik.port=80"
@@ -38,6 +38,7 @@ services:
     networks:
       - web
       - default
+      - webmail
     mem_limit: 150m
     cpus: 0.2
     depends_on:
@@ -63,6 +64,8 @@ services:
       - "$ROOT/redis:/data"
     networks:
       - default
+    depends_on:
+      - resolver
 
   imap:
     image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-master}
@@ -70,12 +73,12 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/mail:/mail"
-      - "$ROOT/overrides:/overrides"
+      - "$ROOT/overrides:/overrides:ro"
     depends_on:
       - front
       - resolver
     dns:
-      - $DNS      
+      - $DNS
     networks:
       - default
     blkio_config:
@@ -101,6 +104,16 @@ services:
     mem_limit: 250m
     cpus: 0.2
 
+  oletools:
+    image: ${DOCKER_ORG:-mailu}/oletools:${MAILU_VERSION:-master}
+    hostname: oletools
+    restart: always
+    env_file: .env
+    networks:
+      - noinet
+    mem_limit: 500m
+    cpus: 0.5
+
   antispam:
     image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-master}
     restart: always
@@ -111,10 +124,14 @@ services:
       - "$ROOT/overrides/rspamd:/etc/rspamd/override.d"
     depends_on:
       - front
+      - redis
+      - oletools
+      - antivirus
       - resolver
     networks:
       - default
       - web
+      - noinet
     dns:
       - $DNS
     mem_limit: 400m
@@ -126,11 +143,11 @@ services:
     env_file: .env
     volumes:
       - "$ROOT/filter:/data"
-    depends_on:
-      - resolver
     networks:
       - default
       - web
+    depends_on:
+      - resolver
     dns:
       - $DNS
     blkio_config:
@@ -145,15 +162,11 @@ services:
     volumes:
       - "$ROOT/dav:/data"
     networks:
-      - default
+      - radicale
     blkio_config:
       weight: 100
     mem_limit: 100m
     cpus: 0.1
-    depends_on:
-      - resolver
-    dns:
-      - $DNS
 
   admin:
     image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-master}
@@ -166,25 +179,20 @@ services:
       - redis
       - resolver
     dns:
-      - $DNS          
+      - $DNS
     networks:
       - default
     mem_limit: 500m
     cpus: 0.5
 
   webmail:
-    image: "${DOCKER_ORG:-mailu}/$WEBMAIL:${MAILU_VERSION:-master}"
+    image: "${DOCKER_ORG:-mailu}/webmail:${MAILU_VERSION:-master}"
     restart: always
     env_file: .env
     volumes:
       - "$ROOT/webmail:/data"
-    depends_on:
-      - imap
-      - resolver
-    dns:
-      - $DNS
     networks:
-      - default
+      - webmail
     mem_limit: 500m
     cpus: 0.2
 
@@ -196,6 +204,9 @@ services:
       - default
       - web
     depends_on:
+      - admin
+      - smtp
+      - imap
       - resolver
     dns:
       - $DNS
@@ -211,7 +222,7 @@ services:
       - DOMAIN=$TRAEFIK_DOMAIN
     volumes:
       - "/opt/traefik:/traefik"
-      - "$ROOT/certs:/output"    
+      - "$ROOT/certs:/output"
 
 networks:
   default:
@@ -223,3 +234,12 @@ networks:
         - subnet: $SUBNET
   web:
     external: true
+  radicale:
+    driver: bridge
+    internal: true
+  webmail:
+    driver: bridge
+    internal: true
+  noinet:
+    driver: bridge
+    internal: true
