@@ -2,7 +2,7 @@ version: '3'
 
 services:
   development:
-    image: mailu/docs:${DEVELOPMENT}
+    image: ghcr.io/mailu/docs:${DEVELOPMENT}
     networks:
       - web
     labels:
@@ -12,7 +12,7 @@ services:
     restart: always
 
   stable:
-    image: mailu/docs:${STABLE}
+    image: ghcr.io/mailu/docs:${STABLE}
     networks:
       - web
     labels:
@@ -25,7 +25,7 @@ services:
     restart: always
 
   oldstable:
-    image: mailu/docs:${OLD_STABLE}
+    image: ghcr.io/mailu/docs:${OLD_STABLE}
     networks:
       - web
     labels:
@@ -35,7 +35,7 @@ services:
     restart: always
 
   legacy:
-    image: mailu/docs:${LEGACY}
+    image: ghcr.io/mailu/docs:${LEGACY}
     networks:
       - web
     labels:

@@ -10,7 +10,7 @@ services:
     restart: always
 
   development:
-    image: mailu/setup:${DEVELOPMENT}
+    image: ghcr.io/mailu/setup:${DEVELOPMENT}
     networks:
       - web
       - default
@@ -29,7 +29,7 @@ services:
     restart: always
 
   stable:
-    image: mailu/setup:${STABLE}
+    image: ghcr.io/mailu/setup:${STABLE}
     networks:
       - web
       - default

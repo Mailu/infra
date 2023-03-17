@@ -3,7 +3,7 @@ version: '2.2'
 services:
 
   front:
-    image: ${DOCKER_ORG:-mailu}/nginx:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/nginx:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     logging:
@@ -47,7 +47,7 @@ services:
       - $DNS
 
   resolver:
-    image: ${DOCKER_ORG:-mailu}/unbound:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/unbound:${MAILU_VERSION:-master}
     env_file: .env
     restart: always
     networks:
@@ -68,7 +68,7 @@ services:
       - resolver
 
   imap:
-    image: ${DOCKER_ORG:-mailu}/dovecot:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/dovecot:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -87,7 +87,7 @@ services:
     cpus: 0.3
 
   smtp:
-    image: ${DOCKER_ORG:-mailu}/postfix:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/postfix:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -105,7 +105,7 @@ services:
     cpus: 0.2
 
   oletools:
-    image: ${DOCKER_ORG:-mailu}/oletools:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/oletools:${MAILU_VERSION:-master}
     hostname: oletools
     restart: always
     env_file: .env
@@ -115,7 +115,7 @@ services:
     cpus: 0.5
 
   antispam:
-    image: ${DOCKER_ORG:-mailu}/rspamd:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/rspamd:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -138,7 +138,7 @@ services:
     cpus: 0.2
 
   antivirus:
-    image: ${DOCKER_ORG:-mailu}/$ANTIVIRUS:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/$ANTIVIRUS:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -156,7 +156,7 @@ services:
     cpus: 0.75
 
   webdav:
-    image: ${DOCKER_ORG:-mailu}/$WEBDAV:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/$WEBDAV:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -169,7 +169,7 @@ services:
     cpus: 0.1
 
   admin:
-    image: ${DOCKER_ORG:-mailu}/admin:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/admin:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     volumes:
@@ -186,7 +186,7 @@ services:
     cpus: 0.5
 
   webmail:
-    image: "${DOCKER_ORG:-mailu}/webmail:${MAILU_VERSION:-master}"
+    image: "${DOCKER_ORG:-ghcr.io/mailu}/webmail:${MAILU_VERSION:-master}"
     restart: always
     env_file: .env
     volumes:
@@ -197,7 +197,7 @@ services:
     cpus: 0.2
 
   fetchmail:
-    image: ${DOCKER_ORG:-mailu}/fetchmail:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/fetchmail:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
     networks:
@@ -215,7 +215,7 @@ services:
 
   certdumper:
     restart: always
-    image: ${DOCKER_ORG:-mailu}/traefik-certdumper:${MAILU_VERSION:-master}
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/traefik-certdumper:${MAILU_VERSION:-master}
     environment:
     # Make sure this is the same as the main=-domain in traefik.toml
     # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
