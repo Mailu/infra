@@ -8,8 +8,8 @@ set -e
 
 for service in demo docs setup traefik ; do (
         pushd /opt/infra/$service/
-        docker-compose pull
-        docker-compose up -d
+        /usr/bin/docker compose pull
+        /usr/bin/docker compose up -d
         popd
         )
 done
