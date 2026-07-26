@@ -7,7 +7,9 @@ services:
     restart: always
     env_file: .env
     logging:
-      driver: $LOG_DRIVER
+      driver: journald
+      options:
+        tag: mailu-front
     ports:
 #      - "$BIND_ADDRESS4:80:80"
 #      - "$BIND_ADDRESS4:443:443"
@@ -18,6 +20,7 @@ services:
       - "$BIND_ADDRESS4:25:25"
       - "$BIND_ADDRESS4:465:465"
       - "$BIND_ADDRESS4:587:587"
+      - "$BIND_ADDRESS4:4190:4190"
 #      - "$BIND_ADDRESS6:80:80"
 #      - "$BIND_ADDRESS6:443:443"
       - "$BIND_ADDRESS6:110:110"
@@ -27,6 +30,7 @@ services:
       - "$BIND_ADDRESS6:25:25"
       - "$BIND_ADDRESS6:465:465"
       - "$BIND_ADDRESS6:587:587"
+      - "$BIND_ADDRESS6:4190:4190"
     volumes:
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides/nginx:/overrides:ro"
@@ -74,6 +78,10 @@ services:
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides:ro"
+    logging:
+      driver: journald
+      options:
+        tag: mailu-imap
     depends_on:
       - front
       - resolver
@@ -90,6 +98,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/postfix:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-smtp
     volumes:
       - "$ROOT/overrides:/overrides"
     depends_on:
@@ -109,10 +121,37 @@ services:
     hostname: oletools
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-oletools
     networks:
       - noinet
     mem_limit: 500m
     cpus: 0.5
+
+  fts_attachments:
+    image: apache/tika:latest-full
+    hostname: tika
+    logging:
+      driver: journald
+      options:
+        tag: mailu-tika
+    restart: always
+    networks:
+      - fts_attachments
+    depends_on:
+      - resolver
+    dns:
+      - $DNS
+    healthcheck:
+      test: ["CMD-SHELL", "wget -nv -t1 -O /dev/null http://127.0.0.1:9998/tika || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    mem_limit: 800m
+    cpus: 0.2
 
   antispam:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/rspamd:${MAILU_VERSION:-master}
@@ -141,6 +180,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/$ANTIVIRUS:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-antispam
     volumes:
       - "$ROOT/filter:/data"
     networks:
@@ -159,6 +202,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/$WEBDAV:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-webdav
     volumes:
       - "$ROOT/dav:/data"
     networks:
@@ -172,6 +219,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/admin:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-admin
     volumes:
       - "$ROOT/data:/data"
       - "$ROOT/dkim:/dkim"
@@ -189,6 +240,10 @@ services:
     image: "${DOCKER_ORG:-ghcr.io/mailu}/webmail:${MAILU_VERSION:-master}"
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-webmail
     volumes:
       - "$ROOT/webmail:/data"
     networks:
@@ -200,6 +255,10 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/fetchmail:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    logging:
+      driver: journald
+      options:
+        tag: mailu-fetchmail
     networks:
       - default
       - web
