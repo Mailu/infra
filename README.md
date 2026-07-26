@@ -20,6 +20,14 @@ Treafik is used as reverse proxy and takes care of (sub) domain web routing.
 
 The compose file and configuration can be found in the `./traefik` directory
 
+Modern docker requires some trickery with old traefik:
+```
+cat > /etc/systemd/system/docker.service.d/min_api_version.conf <<EOT
+[Service]
+Environment="DOCKER_MIN_API_VERSION=1.24"
+EOT
+```
+
 ### Documentation
 
 The documentation docker-compose file is located in the `./docs` directory. It defines a service for every release version of Mailu since `1.5`, including master.
@@ -45,7 +53,7 @@ However, the demo server cannot send any SMTP mail to external hosts. Those mail
 
 ## The server
 
-The server is running Ubuntu 18.04.5 LTS, with Docker latest stable from the Docker official APT repositories. `ufw` firewall is enabled and only allows access to SSH, HTTP and HTTPS. Other ports for services are configured by Docker.
+The server is running Ubuntu 26.04 LTS, with ubuntu Docker. `ufw` firewall is enabled and only allows access to SSH, HTTP and HTTPS. Other ports for services are configured by Docker.
 
 ### SSH access
 
