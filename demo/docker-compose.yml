@@ -89,6 +89,7 @@ services:
       - $DNS
     networks:
       - default
+      - fts_attachments
     blkio_config:
       weight: 100
     mem_limit: 250m
@@ -300,5 +301,8 @@ networks:
     driver: bridge
     internal: true
   noinet:
+    driver: bridge
+    internal: true
+  fts_attachments:
     driver: bridge
     internal: true
