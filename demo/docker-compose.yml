@@ -1,5 +1,3 @@
-version: '2.2'
-
 services:
 
   front:
@@ -10,35 +8,64 @@ services:
       driver: journald
       options:
         tag: mailu-front
-    ports:
-#      - "$BIND_ADDRESS4:80:80"
-#      - "$BIND_ADDRESS4:443:443"
-      - "$BIND_ADDRESS4:110:110"
-      - "$BIND_ADDRESS4:143:143"
-      - "$BIND_ADDRESS4:993:993"
-      - "$BIND_ADDRESS4:995:995"
-      - "$BIND_ADDRESS4:25:25"
-      - "$BIND_ADDRESS4:465:465"
-      - "$BIND_ADDRESS4:587:587"
-      - "$BIND_ADDRESS4:4190:4190"
-#      - "$BIND_ADDRESS6:80:80"
-#      - "$BIND_ADDRESS6:443:443"
-      - "$BIND_ADDRESS6:110:110"
-      - "$BIND_ADDRESS6:143:143"
-      - "$BIND_ADDRESS6:993:993"
-      - "$BIND_ADDRESS6:995:995"
-      - "$BIND_ADDRESS6:25:25"
-      - "$BIND_ADDRESS6:465:465"
-      - "$BIND_ADDRESS6:587:587"
-      - "$BIND_ADDRESS6:4190:4190"
     volumes:
       - "$ROOT/certs:/certs"
       - "$ROOT/overrides/nginx:/overrides:ro"
     labels:
       - "traefik.enable=true"
-      - "traefik.port=80"
-      - "traefik.frontend.rule=Host:test.mailu.io"
       - "traefik.docker.network=web"
+      # Keep HTTP-01 challenges on Mailu, including certificate renewals.
+      - "traefik.http.routers.mailu-web.rule=Host(`test.mailu.io`) || PathPrefix(`/.well-known/acme-challenge/`)"
+      - "traefik.http.routers.mailu-web.entrypoints=web"
+      - "traefik.http.routers.mailu-web.service=mailu-web"
+      - "traefik.http.routers.mailu-web.priority=100"
+      - "traefik.http.services.mailu-web.loadbalancer.server.port=80"
+      - "traefik.tcp.routers.mailu-websecure.rule=HostSNI(`test.mailu.io`)"
+      - "traefik.tcp.routers.mailu-websecure.entrypoints=websecure"
+      - "traefik.tcp.routers.mailu-websecure.tls.passthrough=true"
+      - "traefik.tcp.routers.mailu-websecure.service=mailu-websecure"
+      - "traefik.tcp.services.mailu-websecure.loadbalancer.server.port=443"
+      - "traefik.tcp.services.mailu-websecure.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-smtp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-smtp.entrypoints=smtp"
+      - "traefik.tcp.routers.mailu-smtp.service=mailu-smtp"
+      - "traefik.tcp.services.mailu-smtp.loadbalancer.server.port=25"
+      - "traefik.tcp.services.mailu-smtp.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-pop3.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-pop3.entrypoints=pop3"
+      - "traefik.tcp.routers.mailu-pop3.service=mailu-pop3"
+      - "traefik.tcp.services.mailu-pop3.loadbalancer.server.port=110"
+      - "traefik.tcp.services.mailu-pop3.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-imap.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-imap.entrypoints=imap"
+      - "traefik.tcp.routers.mailu-imap.service=mailu-imap"
+      - "traefik.tcp.services.mailu-imap.loadbalancer.server.port=143"
+      - "traefik.tcp.services.mailu-imap.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-submissions.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-submissions.entrypoints=submissions"
+      - "traefik.tcp.routers.mailu-submissions.service=mailu-submissions"
+      - "traefik.tcp.services.mailu-submissions.loadbalancer.server.port=465"
+      - "traefik.tcp.services.mailu-submissions.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-submission.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-submission.entrypoints=submission"
+      - "traefik.tcp.routers.mailu-submission.service=mailu-submission"
+      - "traefik.tcp.services.mailu-submission.loadbalancer.server.port=587"
+      - "traefik.tcp.services.mailu-submission.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-imaps.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-imaps.entrypoints=imaps"
+      - "traefik.tcp.routers.mailu-imaps.service=mailu-imaps"
+      - "traefik.tcp.services.mailu-imaps.loadbalancer.server.port=993"
+      - "traefik.tcp.services.mailu-imaps.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-pop3s.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-pop3s.entrypoints=pop3s"
+      - "traefik.tcp.routers.mailu-pop3s.service=mailu-pop3s"
+      - "traefik.tcp.services.mailu-pop3s.loadbalancer.server.port=995"
+      - "traefik.tcp.services.mailu-pop3s.loadbalancer.proxyProtocol.version=2"
+      - "traefik.tcp.routers.mailu-sieve.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mailu-sieve.entrypoints=sieve"
+      - "traefik.tcp.routers.mailu-sieve.service=mailu-sieve"
+      - "traefik.tcp.services.mailu-sieve.loadbalancer.server.port=4190"
+      - "traefik.tcp.services.mailu-sieve.loadbalancer.proxyProtocol.version=2"
     networks:
       - web
       - default
@@ -178,7 +205,7 @@ services:
     cpus: 0.2
 
   antivirus:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/$ANTIVIRUS:${MAILU_VERSION:-master}
+    image: clamav/clamav-debian:stable
     restart: always
     env_file: .env
     logging:
@@ -272,17 +299,6 @@ services:
       - $DNS
     mem_limit: 200m
     cpus: 0.2
-
-  certdumper:
-    restart: always
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/traefik-certdumper:${MAILU_VERSION:-master}
-    environment:
-    # Make sure this is the same as the main=-domain in traefik.toml
-    # !!! Also don’t forget to add "TRAEFIK_DOMAIN=[...]" to your .env!
-      - DOMAIN=$TRAEFIK_DOMAIN
-    volumes:
-      - "/opt/traefik:/traefik"
-      - "$ROOT/certs:/output"
 
 networks:
   default:

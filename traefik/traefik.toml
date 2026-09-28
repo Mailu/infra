@@ -1,38 +1,60 @@
-debug = false
-
-logLevel = "WARN"
-defaultEntryPoints = ["https","http"]
+[log]
+  level = "WARN"
 
 [accessLog]
 
-[entryPoints]
-  [entryPoints.http]
+[api]
+  dashboard = true
+  insecure = true
+
+# The insecure API must only be accessible locally in host-network mode.
+[entryPoints.traefik]
+  address = "127.0.0.1:8080"
+
+[providers.docker]
+  endpoint = "unix:///var/run/docker.sock"
+  exposedByDefault = false
+  network = "web"
+
+[entryPoints.web]
   address = ":80"
-    [entryPoints.http.redirect]
-    entryPoint = "https"
-  [entryPoints.https]
+  # Mailu's HTTP-01 requests must reach Mailu instead of Traefik's redirect.
+  [entryPoints.web.http.redirections.entryPoint]
+    to = "websecure"
+    priority = 1
+
+[entryPoints.websecure]
   address = ":443"
-    [entryPoints.https.redirect]
-      regex = "^https://mailu.io/(.*)?/_downloads/(docker-compose.yml|.env)"
-      replacement = "https://raw.githubusercontent.com/Mailu/Mailu/${1}/docs/compose/${2}"
-    [entryPoints.https.tls]
+  # HTTP/3 terminates here for the docs and setup sites. test.mailu.io uses
+  # TCP TLS passthrough so Mailu owns its certificate and TLS termination.
+  [entryPoints.websecure.http3]
 
-[retry]
+[entryPoints.smtp]
+  address = ":25"
 
-[docker]
-endpoint = "unix:///var/run/docker.sock"
-domain = "mailu.io"
-watch = true
-exposedByDefault = false
-network = "web"
+[entryPoints.pop3]
+  address = ":110"
 
-[acme]
-email = "tim@usrpro.com"
-storage = "acme.json"
-entryPoint = "https"
-  [acme.httpChallenge]
-  entryPoint = "http"
+[entryPoints.imap]
+  address = ":143"
 
-[[acme.domains]]
-  main = "mailu.io"
-  sans = ["setup.mailu.io","test.mailu.io"]
+[entryPoints.submissions]
+  address = ":465"
+
+[entryPoints.submission]
+  address = ":587"
+
+[entryPoints.imaps]
+  address = ":993"
+
+[entryPoints.pop3s]
+  address = ":995"
+
+[entryPoints.sieve]
+  address = ":4190"
+
+[certificatesResolvers.letsencrypt.acme]
+  email = "tim@usrpro.com"
+  # v1's acme.json is not compatible with Traefik v3.
+  storage = "/acme-v3.json"
+  [certificatesResolvers.letsencrypt.acme.tlsChallenge]

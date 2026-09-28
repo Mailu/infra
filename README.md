@@ -12,7 +12,7 @@ It currently has two tasks:
 
 ### Reverse proxy
 
-Treafik is used as reverse proxy and takes care of (sub) domain web routing.
+Traefik v3 is used as reverse proxy and takes care of (sub) domain web routing.
 
 - `https://mailu.io/<ver>`: Documentation
 - `https://setup.mailu.io/<ver>`: Setup
@@ -20,13 +20,16 @@ Treafik is used as reverse proxy and takes care of (sub) domain web routing.
 
 The compose file and configuration can be found in the `./traefik` directory
 
-Modern docker requires some trickery with old traefik:
-```
-cat > /etc/systemd/system/docker.service.d/min_api_version.conf <<EOT
-[Service]
-Environment="DOCKER_MIN_API_VERSION=1.24"
-EOT
-```
+Traefik terminates TLS and serves HTTP/3 (TCP and UDP port 443) for the docs
+and setup sites. It uses TLS-ALPN-01 for their certificates. Port 80 forwards
+Mailu's HTTP-01 challenges to Mailu. On `test.mailu.io`, Traefik forwards TCP
+443 with TLS passthrough and PROXY protocol v2; Mailu terminates TLS and obtains
+its own certificate. HTTP/3 is not available for the demo site: Traefik cannot
+pass QUIC/TLS through to Mailu on the shared UDP port 443. Mail client ports
+also use PROXY protocol v2 between Traefik and Mailu.
+Traefik uses host networking to preserve IPv6 client addresses (Docker's IPv6
+published-port proxy otherwise replaces them with the bridge gateway). It
+still discovers backends on the `web` Docker network via the Docker provider.
 
 ### Documentation
 
@@ -38,10 +41,10 @@ The setup docker-compose file is located in the `./setup` directory. It defines 
 
 ### Demo server
 
-The demo service docker-compose file is located in the `./demo` directory. It is a customized version which takes care of resource limiting. It uses the `certdumper` service to extract TLS certificates from Treafik.
+The demo service docker-compose file is located in the `./demo` directory. It is a customized version which takes care of resource limiting. Mailu manages its own Let's Encrypt certificate.
 
 The `default` network is set to `internal`. Remainning services that need internet access use the `web` network.
-The `front` service is bound to the usual ports, except `80` and `443`, as these web ports are routed through traefik.
+The `front` service is reachable through the shared `web` Docker network, and Traefik publishes its mail and web ports.
 This means that the demo server can:
 
  1. Receive SMTP e-mail (both incomming in authenticated)
