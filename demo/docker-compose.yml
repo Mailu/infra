@@ -9,7 +9,7 @@ services:
       options:
         tag: mailu-front
     volumes:
-      - "$ROOT/certs:/certs"
+      - "/opt/certs:/certs"
       - "$ROOT/overrides/nginx:/overrides:ro"
     labels:
       - "traefik.enable=true"
