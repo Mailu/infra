@@ -16,6 +16,10 @@ services:
       - SYS_CHROOT
       - CHOWN
       - KILL
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 524288
     logging:
       driver: journald
       options:
@@ -123,6 +127,10 @@ services:
       - DAC_OVERRIDE
       - SYS_CHROOT
       - KILL
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 524288
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides:ro"
@@ -156,6 +164,8 @@ services:
       - FOWNER
       - SETUID
       - SETGID
+      # postfix set-permissions needs FSETID to set postdrop's setgid bit.
+      - FSETID
       - SYS_CHROOT
       - CHOWN
       - KILL

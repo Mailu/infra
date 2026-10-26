@@ -41,7 +41,7 @@ The setup docker-compose file is located in the `./setup` directory. It defines 
 
 ### Demo server
 
-The demo service docker-compose file is located in the `./demo` directory. It is a customized version which takes care of resource limiting. Mailu manages its own Let's Encrypt certificate.
+The demo service docker-compose file is located in the `./demo` directory. It is customized for Traefik routing, PROXY protocol, and isolated networks; it follows Mailu's generated service hardening and leaves CPU and memory scheduling to the host. Mailu manages its own Let's Encrypt certificate.
 
 The `default` network is set to `internal`. Remainning services that need internet access use the `web` network.
 The `front` service is reachable through the shared `web` Docker network, and Traefik publishes its mail and web ports.
@@ -57,6 +57,10 @@ However, the demo server cannot send any SMTP mail to external hosts. Those mail
 ## The server
 
 The server is running Ubuntu 26.04 LTS, with ubuntu Docker. `ufw` firewall is enabled and only allows access to SSH, HTTP and HTTPS. Other ports for services are configured by Docker.
+
+Redis recommends `vm.overcommit_memory=1` for reliable background saves. This is
+a host-level setting and cannot be applied through a service-level Compose
+setting. Configure it in `/etc/sysctl.d/` and apply it with `sysctl --system`.
 
 ### SSH access
 
