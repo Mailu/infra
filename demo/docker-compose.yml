@@ -4,6 +4,18 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/nginx:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+      - SYS_CHROOT
+      - CHOWN
+      - KILL
     logging:
       driver: journald
       options:
@@ -70,8 +82,6 @@ services:
       - web
       - default
       - webmail
-    mem_limit: 150m
-    cpus: 0.2
     depends_on:
       - resolver
     dns:
@@ -85,8 +95,6 @@ services:
       default:
         ipv4_address: $DNS
       web:
-    mem_limit: 150m
-    cpus: 0.2
 
   redis:
     image: redis:alpine
@@ -102,6 +110,19 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/dovecot:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+      - FOWNER
+      - DAC_OVERRIDE
+      - SYS_CHROOT
+      - KILL
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides:ro"
@@ -119,13 +140,25 @@ services:
       - fts_attachments
     blkio_config:
       weight: 100
-    mem_limit: 250m
-    cpus: 0.3
 
   smtp:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/postfix:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    # Keep no-new-privileges disabled: postdrop relies on setgid execution to
+    # write to the maildrop queue. CAP_SETGID does not restore that transition,
+    # and group_add would expose the postdrop group to inheriting processes.
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETUID
+      - SETGID
+      - SYS_CHROOT
+      - CHOWN
+      - KILL
     logging:
       driver: journald
       options:
@@ -141,8 +174,6 @@ services:
       - $DNS
     blkio_config:
       weight: 100
-    mem_limit: 250m
-    cpus: 0.2
 
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/oletools:${MAILU_VERSION:-master}
@@ -155,8 +186,6 @@ services:
         tag: mailu-oletools
     networks:
       - noinet
-    mem_limit: 500m
-    cpus: 0.5
 
   fts_attachments:
     image: apache/tika:latest-full
@@ -178,8 +207,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    mem_limit: 800m
-    cpus: 0.2
 
   antispam:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/rspamd:${MAILU_VERSION:-master}
@@ -201,8 +228,6 @@ services:
       - noinet
     dns:
       - $DNS
-    mem_limit: 400m
-    cpus: 0.2
 
   antivirus:
     image: clamav/clamav-debian:stable
@@ -223,8 +248,6 @@ services:
       - $DNS
     blkio_config:
       weight: 100
-    mem_limit: 2000m
-    cpus: 0.75
 
   webdav:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/$WEBDAV:${MAILU_VERSION:-master}
@@ -240,8 +263,6 @@ services:
       - radicale
     blkio_config:
       weight: 100
-    mem_limit: 100m
-    cpus: 0.1
 
   admin:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/admin:${MAILU_VERSION:-master}
@@ -261,8 +282,6 @@ services:
       - $DNS
     networks:
       - default
-    mem_limit: 500m
-    cpus: 0.5
 
   webmail:
     image: "${DOCKER_ORG:-ghcr.io/mailu}/webmail:${MAILU_VERSION:-master}"
@@ -276,8 +295,6 @@ services:
       - "$ROOT/webmail:/data"
     networks:
       - webmail
-    mem_limit: 500m
-    cpus: 0.2
 
   fetchmail:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/fetchmail:${MAILU_VERSION:-master}
@@ -297,8 +314,6 @@ services:
       - resolver
     dns:
       - $DNS
-    mem_limit: 200m
-    cpus: 0.2
 
 networks:
   default:
