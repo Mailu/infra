@@ -13,5 +13,4 @@ MAILTO=root
 # |  |  |  |  |
 # *  *  *  *  * user-name  command to be executed
 0 3,12,20 * * * root /opt/infra/demo/reset.sh
-5,15,25,35,45,55 * * * * root /opt/infra/demo/admin-pw.sh
 3,10,20,30,40,50 * * * * root /opt/infra/update.sh
