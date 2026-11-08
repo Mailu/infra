@@ -21,6 +21,8 @@ echo "Mailu admin is healthy"
 /usr/bin/docker compose exec -T admin /bin/sh -c "flask mailu config-import -u" <<'EOT'
 domain:
   - name: test.mailu.io
+    signup_enabled: true
+    anonmail_enabled: true
     domain_accesses: []
 
 user:
