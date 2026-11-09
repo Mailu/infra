@@ -134,6 +134,9 @@ services:
     volumes:
       - "$ROOT/mail:/mail"
       - "$ROOT/overrides:/overrides:ro"
+    # Sieve modules are loaded from this chroot, so this mount must allow executable mappings.
+    tmpfs:
+      - /mail/usr:rw,nosuid,nodev,exec,size=128m
     logging:
       driver: journald
       options:
@@ -302,7 +305,8 @@ services:
       options:
         tag: mailu-webmail
     volumes:
-      - "$ROOT/webmail:/data"
+      - "$ROOT/overrides/roundcube:/roundcube-overrides"
+      - "$ROOT/overrides/snappymail:/snappymail-overrides"
     networks:
       - webmail
 
