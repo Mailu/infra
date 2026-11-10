@@ -86,6 +86,8 @@ services:
       - web
       - default
       - webmail
+      # Front proxies DAV to Radicale, including webmail's private DAV route.
+      - radicale
     depends_on:
       - resolver
     dns:
@@ -266,6 +268,15 @@ services:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/$WEBDAV:${MAILU_VERSION:-master}
     restart: always
     env_file: .env
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # Startup repairs ownership on the existing /data volume before dropping to mailu.
+      - CHOWN
+      - SETUID
+      - SETGID
     logging:
       driver: journald
       options:
@@ -305,8 +316,8 @@ services:
       options:
         tag: mailu-webmail
     volumes:
-      - "$ROOT/overrides/roundcube:/roundcube-overrides"
-      - "$ROOT/overrides/snappymail:/snappymail-overrides"
+      - "$ROOT/overrides/roundcube:/roundcube-overrides:ro"
+      - "$ROOT/overrides/snappymail:/snappymail-overrides:ro"
     networks:
       - webmail
 
